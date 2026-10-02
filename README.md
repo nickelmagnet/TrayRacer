@@ -1,35 +1,3 @@
-# OppnGL
+# TrayRacer
 
-A small OpenGL renderer with a pile of ( 2 ) test scenes on top. Made to learn how the pieces fit together.
-
-## Tech
-
-- **Language:** C++20
-- **Windowing / input:** [GLFW](https://www.glfw.org/)
-- **Function loading:** [GLEW](https://glew.sourceforge.net/) (static)
-- **Build:** CMake (4.0+) with Ninja
-
-## Project layout
-
-```
-OppnGL/
-├── Dependencies/      # Prebuilt GLFW + GLEW (headers and libs)
-├── include/           # Project headers
-├── res/               # Shaders, textures, other runtime resources
-├── src/               # Source files 
-│   ├── vendor/        # Third-party single-file/source libs(glm/imgui)
-│   └── tests/         # Tests for small features
-├── CMakeLists.txt
-└── CMakePresets.json
-```
-
-The executable ends up in `bin/<Debug|Release>/OppnGL.exe`.
-It is basically a decent template with few abstractions and a decent test framework 
-
-## Screenshots
-
-<p align="center">
-  <img src="screenshots/ClearColor.png" width="49%">
-  <img src="screenshots/2DTexture.png" width="49%">
-</p>
-
+A ray-tracer

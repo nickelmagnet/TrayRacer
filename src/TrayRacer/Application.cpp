@@ -248,7 +248,7 @@ static void SetupVulkanWindow(ImGui_ImplVulkanH_Window* wd, VkSurfaceKHR surface
 
 	// Create SwapChain, RenderPass, Framebuffer, etc.
 	IM_ASSERT(g_MinImageCount >= 2);
-	ImGui_ImplVulkanH_CreateOrResizeWindow(g_Instance, g_PhysicalDevice, g_Device, wd, g_QueueFamily, g_Allocator, width, height, g_MinImageCount);
+	ImGui_ImplVulkanH_CreateOrResizeWindow(g_Instance, g_PhysicalDevice, g_Device, wd, g_QueueFamily, g_Allocator, width, height, g_MinImageCount, 0);
 }
 
 static void CleanupVulkan()
@@ -268,6 +268,7 @@ static void CleanupVulkan()
 static void CleanupVulkanWindow()
 {
 	ImGui_ImplVulkanH_DestroyWindow(g_Instance, g_Device, &g_MainWindowData, g_Allocator);
+	vkDestroySurfaceKHR(g_Instance, g_MainWindowData.Surface, g_Allocator);
 }
 
 static void FrameRender(ImGui_ImplVulkanH_Window* wd, ImDrawData* draw_data)
@@ -294,7 +295,7 @@ static void FrameRender(ImGui_ImplVulkanH_Window* wd, ImDrawData* draw_data)
 		err = vkResetFences(g_Device, 1, &fd->Fence);
 		check_vk_result(err);
 	}
-	
+
 	{
 		// Free resources in queue
 		for (auto& func : s_ResourceFreeQueue[s_CurrentFrameIndex])
@@ -474,13 +475,14 @@ namespace TrayRacer {
 		init_info.Queue = g_Queue;
 		init_info.PipelineCache = g_PipelineCache;
 		init_info.DescriptorPool = g_DescriptorPool;
-		init_info.Subpass = 0;
 		init_info.MinImageCount = g_MinImageCount;
 		init_info.ImageCount = wd->ImageCount;
-		init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+		init_info.PipelineInfoMain.RenderPass = wd->RenderPass;
+		init_info.PipelineInfoMain.Subpass = 0;
+		init_info.PipelineInfoMain.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 		init_info.Allocator = g_Allocator;
 		init_info.CheckVkResultFn = check_vk_result;
-		ImGui_ImplVulkan_Init(&init_info, wd->RenderPass);
+		ImGui_ImplVulkan_Init(&init_info);
 
 		// Load default font
 		ImFontConfig fontConfig;
@@ -488,35 +490,7 @@ namespace TrayRacer {
 		ImFont* robotoFont = io.Fonts->AddFontFromMemoryTTF((void*)g_RobotoRegular, sizeof(g_RobotoRegular), 20.0f, &fontConfig);
 		io.FontDefault = robotoFont;
 
-		// Upload Fonts
-		{
-			// Use any command queue
-			VkCommandPool command_pool = wd->Frames[wd->FrameIndex].CommandPool;
-			VkCommandBuffer command_buffer = wd->Frames[wd->FrameIndex].CommandBuffer;
 
-			err = vkResetCommandPool(g_Device, command_pool, 0);
-			check_vk_result(err);
-			VkCommandBufferBeginInfo begin_info = {};
-			begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-			begin_info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-			err = vkBeginCommandBuffer(command_buffer, &begin_info);
-			check_vk_result(err);
-
-			ImGui_ImplVulkan_CreateFontsTexture(command_buffer);
-
-			VkSubmitInfo end_info = {};
-			end_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-			end_info.commandBufferCount = 1;
-			end_info.pCommandBuffers = &command_buffer;
-			err = vkEndCommandBuffer(command_buffer);
-			check_vk_result(err);
-			err = vkQueueSubmit(g_Queue, 1, &end_info, VK_NULL_HANDLE);
-			check_vk_result(err);
-
-			err = vkDeviceWaitIdle(g_Device);
-			check_vk_result(err);
-			ImGui_ImplVulkan_DestroyFontUploadObjects();
-		}
 	}
 
 	void Application::Shutdown()
@@ -580,7 +554,7 @@ namespace TrayRacer {
 				if (width > 0 && height > 0)
 				{
 					ImGui_ImplVulkan_SetMinImageCount(g_MinImageCount);
-					ImGui_ImplVulkanH_CreateOrResizeWindow(g_Instance, g_PhysicalDevice, g_Device, &g_MainWindowData, g_QueueFamily, g_Allocator, width, height, g_MinImageCount);
+					ImGui_ImplVulkanH_CreateOrResizeWindow(g_Instance, g_PhysicalDevice, g_Device, &g_MainWindowData, g_QueueFamily, g_Allocator, width, height, g_MinImageCount, 0);
 					g_MainWindowData.FrameIndex = 0;
 
 					// Clear allocated command buffers from here since entire pool is destroyed

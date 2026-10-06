@@ -1,27 +1,34 @@
 # TrayRacer
 
-TrayRacer is a C++17 Vulkan and Dear ImGui desktop application using GLFW. Its framework code is in `src/TrayRacer`, and the app entry point is in `TrayRacerApp`.
+A ray tracer in C++, built from scratch to understand how light, math and GPUs actually work. 🔦
 
-## Build and run in WSL2
+Runs on Linux (developed in WSL2). Window + UI via GLFW and Dear ImGui, display through Vulkan.
 
-Use a WSL2 Ubuntu installation with WSLg enabled to display the application window on your Windows desktop. Vulkan must also be available inside WSL.
+## The plan
 
-Install the compiler, Make, Vulkan, and GLFW X11 development dependencies:
+1. **CPU ray tracer** renders the image into a pixel buffer.
+2. Pixels get uploaded to the GPU through **Vulkan** and shown in the window (with ImGui controls).
+3. **Later:** move the tracing itself onto the GPU (Vulkan compute shader, plus a BVH).
+
+## Status
+
+- [x] Vulkan + GLFW + ImGui window running
+- [ ] CPU ray tracer (spheres, materials, bounces)
+- [ ] CPU pixels shown in window via Vulkan
+- [ ] BVH
+- [ ] GPU ray tracing (Vulkan compute)
+
+## Build
+
+Needs: `make`, a C++ compiler, GLFW, Vulkan SDK/headers.
+
+Dependencies in `vendor/` are git submodules, so clone with:
 
 ```bash
-sudo apt update
-sudo apt install build-essential make libgl-dev libx11-dev libxrandr-dev \
-  libxinerama-dev libxcursor-dev libxi-dev libxxf86vm-dev libvulkan-dev \
-  mesa-vulkan-drivers vulkan-tools
+git clone --recursive https://github.com/nickelmagnet/TrayRacer.git
+cd TrayRacer
+make
+./bin/TrayRacerApp
 ```
 
-From the repository root, build and run:
-
-```bash
-make -j"$(nproc)"
-make run
-```
-
-The executable is `build/TrayRacer`. To start it directly, run `./build/TrayRacer`. To remove generated objects and the executable, run `make clean`.
-
-The Makefile compiles the vendored GLFW Linux/X11 sources and the included ImGui sources directly. You do not need Premake, CMake, or Ninja for this build. The vendored libraries remain under `vendor/`.
+If you already cloned without `--recursive`: `git submodule update --init --recursive`

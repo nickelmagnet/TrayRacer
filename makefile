@@ -5,8 +5,8 @@ AR  := ar
 BIN := bin
 BUILD := build
 
-TARGET := $(BIN)/TrayRacer
-GLFW_LIB := $(BIN)/lib/libglfw.a
+TARGET := $(BIN)/$(CONFIG)/TrayRacer
+GLFW_LIB := $(BIN)/$(CONFIG)/lib/libglfw.a
 
 CPPFLAGS := \
 	-Isrc/TrayRacer \
@@ -16,11 +16,15 @@ CPPFLAGS := \
 	-Ivendor/glm \
 	-Ivendor/stb_image
 
-CXXFLAGS := -std=c++17 -Wall -Wextra -O2 -g
+CONFIG ?= Debug
 
-CFLAGS := -std=c11 -Wall -Wextra -O2 -g \
-	-D_GLFW_X11 \
-	-D_GNU_SOURCE
+ifeq ($(CONFIG),Debug)
+    CXXFLAGS := -std=c++17 -Wall -Wextra -O0 -g
+    CFLAGS   := -std=c11 -Wall -Wextra -O0 -g -D_GLFW_X11 -D_GNU_SOURCE
+else ifeq ($(CONFIG),Release)
+    CXXFLAGS := -std=c++17 -Wall -Wextra -O2
+    CFLAGS   := -std=c11 -Wall -Wextra -O2 -D_GLFW_X11 -D_GNU_SOURCE
+endif
 
 LDLIBS := \
 	-lvulkan \
@@ -43,12 +47,12 @@ CPP_SRC += \
 	vendor/imgui/backends/imgui_impl_glfw.cpp \
 	vendor/imgui/backends/imgui_impl_vulkan.cpp
 
-CPP_OBJ := $(patsubst %.cpp,$(BUILD)/%.o,$(CPP_SRC))
+CPP_OBJ := $(patsubst %.cpp,$(BUILD)/$(CONFIG)/%.o,$(CPP_SRC))
 
 GLFW_SRC := $(wildcard vendor/glfw/src/*.c)
-GLFW_OBJ := $(patsubst %.c,$(BUILD)/%.o,$(GLFW_SRC))
+GLFW_OBJ := $(patsubst %.c,$(BUILD)/$(CONFIG)/%.o,$(GLFW_SRC))
 
-.PHONY: all clean run glfw
+.PHONY: all clean run glfw debug release
 
 all: $(TARGET)
 
@@ -60,15 +64,23 @@ $(GLFW_LIB): $(GLFW_OBJ)
 	@mkdir -p $(dir $@)
 	$(AR) rcs $@ $^
 
-$(BUILD)/%.o: %.cpp
+$(BUILD)/$(CONFIG)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
-$(BUILD)/%.o: %.c
+$(BUILD)/$(CONFIG)/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 glfw: $(GLFW_LIB)
+
+debug:
+	@$(MAKE) CONFIG=Debug all > build/debug.log 2>&1 || (echo "Debug build failed. See build/debug.log" && exit 1)
+	@echo "Debug build succeeded."
+
+release:
+	@$(MAKE) -j$(nproc) CONFIG=Release all > build/release.log 2>&1 || (echo "Release build failed. See build/release.log" && exit 1)
+	@echo "Release build succeeded."
 
 run: $(TARGET)
 	./$(TARGET)

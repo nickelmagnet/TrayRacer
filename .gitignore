@@ -3,3 +3,4 @@ build/
 .vs/
 *.log
 imgui.ini
+CppProperties.json

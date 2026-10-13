@@ -2,13 +2,13 @@
 
 namespace TrayRacer {
 
-    Camera::Camera(glm::vec3 lookfrom, glm::vec3 lookat, glm::vec3 vup, int image_width, int image_height)
+    Camera::Camera(glm::vec3 lookfrom, glm::vec3 lookat, glm::vec3 vup, uint32_t width, uint32_t height)
     {
         m_origin = lookfrom;
         float theta = glm::radians(m_vfov);
         float viewport_height = 2.0f * m_focal_length * std::tan(theta / 2.0f);
 
-        float aspect_ratio =static_cast<float>(image_width)/static_cast<float>(image_height);
+        float aspect_ratio =static_cast<float>(width)/static_cast<float>(height);
         float viewport_width = viewport_height * aspect_ratio;
 
         glm::vec3 w = glm::normalize(lookfrom - lookat);
@@ -18,8 +18,8 @@ namespace TrayRacer {
         glm::vec3 viewport_u = viewport_width * u;
         glm::vec3 viewport_v = -viewport_height * v;
 
-        m_pixel_delta_u = viewport_u / static_cast<float>(image_width);
-        m_pixel_delta_v = viewport_v / static_cast<float>(image_height);
+        m_pixel_delta_u = viewport_u / static_cast<float>(width);
+        m_pixel_delta_v = viewport_v / static_cast<float>(height);
 
         glm::vec3 viewport_upper_left = m_origin - (m_focal_length * w)- viewport_u / 2.0f - viewport_v / 2.0f;
 

@@ -5,14 +5,15 @@
 namespace TrayRacer {
 
     void Renderer::OnResize(uint32_t w, uint32_t h) {
-        if (m_Image && m_Image->GetWidth() == w && m_Image->GetHeight() == h) return;
+        if (m_Image && GetImageWidth() == w && GetImageHeight() == h) return;
         m_Image = std::make_shared<Image>(w, h, ImageFormat::RGBA);
         m_ImageData.resize(w * h);
+		m_Camera = Camera({ 0.0f, 0.0f, 0.0f },{ 0.0f, 0.0f, -1.0f },{ 0.0f, 1.0f, 0.0f }, w, h);
     }
 
     void Renderer::Render() {
-        const uint32_t width = m_Image->GetWidth();
-        const uint32_t height = m_Image->GetHeight();
+        const uint32_t width = GetImageWidth();
+        const uint32_t height = GetImageHeight();
 
         for (uint32_t y = 0; y < height; y++) {
             for (uint32_t x = 0; x < width; x++) {
@@ -28,20 +29,20 @@ namespace TrayRacer {
 	}
 
 	uint32_t Renderer::PerPixelRay(uint32_t x, uint32_t y) {
-		int i = y * m_Image->GetWidth() + x;
-		double t = (m_Image->GetWidth() > 1) ? (double)x / (double)(m_Image->GetWidth() - 1) : 0.0;
-		double r = (1.0 - t) * 1.0 + t * 0.5;
-		double g = (1.0 - t) * 1.0 + t * 0.7;
-		double b = (1.0 - t) * 1.0 + t * 1.0;
-		uint8_t r_byte = static_cast<uint8_t>(r * 255);
-		uint8_t g_byte = static_cast<uint8_t>(g * 255);
-		uint8_t b_byte = static_cast<uint8_t>(b * 255);
-		return 0xFF000000 | (b_byte << 16) | (g_byte << 8) | r_byte; // ARGB format
+        Ray ray = m_Camera.get_ray(x, y);
+		glm::vec3 dir = ray.GetDirection();
+        float yray = dir.y;
+		float t = 0.5f * (yray + 1.0f);
+		glm::vec3 color = (1.0f - t) * glm::vec3(1.0f, 1.0f, 1.0f) + t * glm::vec3(0.5f, 0.7f, 1.0f);
+        uint8_t r = static_cast<uint8_t>(glm::clamp(color.r, 0.0f, 1.0f) * 255.0f);
+        uint8_t g = static_cast<uint8_t>(glm::clamp(color.g, 0.0f, 1.0f) * 255.0f);
+        uint8_t b = static_cast<uint8_t>(glm::clamp(color.b, 0.0f, 1.0f) * 255.0f);
+
+		return 0xFF000000 | (b << 16) | (g << 8) | r;
 	}
 
     uint32_t Renderer::PerPixelHue(uint32_t x, uint32_t y) {
-        int i = y * m_Image->GetWidth() + x;
-        double t = (m_Image->GetWidth() > 1) ? (double)x / (double)(m_Image->GetWidth() - 1) : 0.0;
+        double t = (GetImageWidth() > 1) ? (double)x / (double)(GetImageWidth() - 1) : 0.0;
 
         double hue = t * 6.0;
         int sector = (int)hue;

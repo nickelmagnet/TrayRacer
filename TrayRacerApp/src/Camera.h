@@ -11,12 +11,12 @@ namespace TrayRacer {
         glm::vec3 m_pixel_delta_u;
         glm::vec3 m_pixel_delta_v;
 
-        const float m_focal_length = 1.0f;
-        const float m_vfov = 90.0f;
+        float m_focal_length = 1.0f;
+        float m_vfov = 90.0f;
 
     public:
-        Camera() = default;
-        Camera(glm::vec3 lookfrom, glm::vec3 lookat, glm::vec3 vup, int image_width, int image_height);
+        Camera(glm::vec3 lookfrom = {0.0f, 0.0f, 0.0f}, glm::vec3 lookat = {0.0f, 0.0f, -1.0f}, glm::vec3 vup = {0.0f, 1.0f, 0.0f}
+        , uint32_t width = 1, uint32_t height = 1);
         Ray get_ray(int i, int j) const;
     };
 }

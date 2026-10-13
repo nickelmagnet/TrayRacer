@@ -19,10 +19,10 @@ CPPFLAGS := \
 CONFIG ?= Debug
 
 ifeq ($(CONFIG),Debug)
-    CXXFLAGS := -std=c++17 -Wall -Wextra -O0 -g
+    CXXFLAGS := -std=c++17 -Wall -Wextra -fsanitize=address -fno-omit-frame-pointer -O0 -g 
     CFLAGS   := -std=c11 -Wall -Wextra -O0 -g -D_GLFW_X11 -D_GNU_SOURCE
 else ifeq ($(CONFIG),Release)
-    CXXFLAGS := -std=c++17 -Wall -Wextra -O2
+    CXXFLAGS := -std=c++17 -Wall -Wextra -fsanitize=address -fno-omit-frame-pointer -O2
     CFLAGS   := -std=c11 -Wall -Wextra -O2 -D_GLFW_X11 -D_GNU_SOURCE
 endif
 

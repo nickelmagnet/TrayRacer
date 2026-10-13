@@ -28,8 +28,20 @@ namespace TrayRacer {
         return PerPixelRay(x, y);
 	}
 
+    bool hitting(const glm::vec3& center, float radius, Ray& r) {
+        glm::vec3 oc = center - r.GetOrigin();
+        auto a = dot(r.GetDirection(), r.GetDirection());
+        auto b = -2.0 * dot(r.GetDirection(), oc);
+        auto c = dot(oc, oc) - radius * radius;
+        auto discriminant = b * b - 4 * a * c;
+        return (discriminant >= 0);
+    }
+
 	uint32_t Renderer::PerPixelRay(uint32_t x, uint32_t y) {
         Ray ray = m_Camera.get_ray(x, y);
+        if (hitting(glm::vec3{ 0.0f, 0.0f, -1.0f }, 0.5f, ray)) {
+			return 0xFF369DF8; // Orange color for hit
+		}
 		glm::vec3 dir = ray.GetDirection();
         float yray = dir.y;
 		float t = 0.5f * (yray + 1.0f);

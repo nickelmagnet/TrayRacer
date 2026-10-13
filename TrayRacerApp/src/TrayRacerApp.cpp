@@ -1,6 +1,5 @@
 #include "Application.h"
 #include "EntryPoint.h"
-#include "Image.h"
 #include "Timer.h"
 
 #include "Renderer.h"

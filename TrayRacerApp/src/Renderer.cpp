@@ -5,8 +5,8 @@
 namespace TrayRacer {
 
     void Renderer::OnResize(uint32_t w, uint32_t h) {
-        if (m_Image && GetImageWidth() == w && GetImageHeight() == h) return;
-        m_Image = std::make_shared<Image>(w, h, ImageFormat::RGBA);
+        if(m_Image) m_Image->Resize(w, h);
+        else m_Image = std::make_shared<Image>(w, h, ImageFormat::RGBA);
         m_ImageData.resize(w * h);
 		m_Camera = Camera({ 0.0f, 0.0f, 0.0f },{ 0.0f, 0.0f, -1.0f },{ 0.0f, 1.0f, 0.0f }, w, h);
     }
@@ -17,44 +17,52 @@ namespace TrayRacer {
 
         for (uint32_t y = 0; y < height; y++) {
             for (uint32_t x = 0; x < width; x++) {
-                m_ImageData[y * width + x] = PerPixel(x, y);
+                m_ImageData[y * width + x] = PerPixel(glm::vec2((float)x, (float)y));
             }
         }
         m_Image->SetData(m_ImageData.data());
     }
 
 
-	uint32_t Renderer::PerPixel(uint32_t x, uint32_t y) {
-        return PerPixelRay(x, y);
+	uint32_t Renderer::PerPixel(glm::vec2 coord) {
+        return PerPixelRay(coord);
 	}
 
-    bool hitting(const glm::vec3& center, float radius, Ray& r) {
-        glm::vec3 oc = center - r.GetOrigin();
-        auto a = dot(r.GetDirection(), r.GetDirection());
-        auto b = -2.0 * dot(r.GetDirection(), oc);
-        auto c = dot(oc, oc) - radius * radius;
-        auto discriminant = b * b - 4 * a * c;
-        return (discriminant >= 0);
-    }
-
-	uint32_t Renderer::PerPixelRay(uint32_t x, uint32_t y) {
-        Ray ray = m_Camera.get_ray(x, y);
-        if (hitting(glm::vec3{ 0.0f, 0.0f, -1.0f }, 0.5f, ray)) {
-			return 0xFF369DF8; // Orange color for hit
-		}
-		glm::vec3 dir = ray.GetDirection();
-        float yray = dir.y;
-		float t = 0.5f * (yray + 1.0f);
-		glm::vec3 color = (1.0f - t) * glm::vec3(1.0f, 1.0f, 1.0f) + t * glm::vec3(0.5f, 0.7f, 1.0f);
-        uint8_t r = static_cast<uint8_t>(glm::clamp(color.r, 0.0f, 1.0f) * 255.0f);
-        uint8_t g = static_cast<uint8_t>(glm::clamp(color.g, 0.0f, 1.0f) * 255.0f);
-        uint8_t b = static_cast<uint8_t>(glm::clamp(color.b, 0.0f, 1.0f) * 255.0f);
-
-		return 0xFF000000 | (b << 16) | (g << 8) | r;
+	uint32_t Renderer::PerPixelRay(glm::vec2 coord) {
+		uint8_t clr = 0, clg = 0, clb = 0;
+        Ray ray = m_Camera.get_ray(coord.x, coord.y);
+        glm::vec3 center{ 0.0f, 0.0f, -1.0f };
+        float radius = 0.5f;
+        glm::vec3 oc = center - ray.GetOrigin();
+        float a = dot(ray.GetDirection(), ray.GetDirection());
+        float b = -2.0 * dot(ray.GetDirection(), oc);
+        float c = dot(oc, oc) - radius * radius;
+        float discriminant = b * b - 4 * a * c;
+        if (discriminant >= 0) {
+            float t = (-b - sqrt(discriminant)) / (2.0 * a);
+			// its solution is t = (-b ± sqrt(discriminant)) / (2.0 * a); 
+			// ray is origin + t * direction,-b is positive so -b-sqrt(discriminant) is closer to cam
+			glm::vec3 hit_point = ray.At(t);
+			glm::vec3 normal = glm::normalize(hit_point - center);
+            clr = static_cast<uint8_t>(glm::clamp(normal.x, 0.0f, 1.0f) * 255.0f);
+            clg = static_cast<uint8_t>(glm::clamp(normal.y, 0.0f, 1.0f) * 255.0f);
+            clb = static_cast<uint8_t>(glm::clamp(normal.z, 0.0f, 1.0f) * 255.0f);
+        }
+        else
+        {
+            glm::vec3 dir = ray.GetDirection();
+            float yray = dir.y;
+            float t = 0.5f * (yray + 1.0f);
+            glm::vec3 color = (1.0f - t) * glm::vec3(1.0f, 1.0f, 1.0f) + t * glm::vec3(0.5f, 0.7f, 1.0f);
+            clr = static_cast<uint8_t>(glm::clamp(color.r, 0.0f, 1.0f) * 255.0f);
+            clg = static_cast<uint8_t>(glm::clamp(color.g, 0.0f, 1.0f) * 255.0f);
+            clb = static_cast<uint8_t>(glm::clamp(color.b, 0.0f, 1.0f) * 255.0f);
+        }
+        return 0xFF000000 | (clb << 16) | (clg << 8) | clr;
 	}
 
-    uint32_t Renderer::PerPixelHue(uint32_t x, uint32_t y) {
-        double t = (GetImageWidth() > 1) ? (double)x / (double)(GetImageWidth() - 1) : 0.0;
+    uint32_t Renderer::PerPixelHue(glm::vec2 coord) {
+        double t = (GetImageWidth() > 1) ? (double)coord.x / (double)(GetImageWidth() - 1) : 0.0;
 
         double hue = t * 6.0;
         int sector = (int)hue;

@@ -7,7 +7,7 @@
 
 #include "vulkan/vulkan.h"
 
-namespace TrayRacer {
+namespace Core {
 
 	enum class ImageFormat
 	{

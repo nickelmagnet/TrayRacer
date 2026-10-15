@@ -8,7 +8,7 @@ namespace TrayRacer {
 
     void Renderer::OnResize(uint32_t w, uint32_t h) {
         if(m_Image) m_Image->Resize(w, h);
-        else m_Image = std::make_shared<Image>(w, h, ImageFormat::RGBA);
+        else m_Image = std::make_shared<Core::Image>(w, h, Core::ImageFormat::RGBA);
         m_ImageData.resize(w * h);
 		m_Camera = Camera({ 0.0f, 0.0f, 0.0f },{ 0.0f, 0.0f, -1.0f },{ 0.0f, 1.0f, 0.0f }, w, h);
     }

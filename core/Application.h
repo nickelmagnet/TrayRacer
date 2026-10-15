@@ -16,7 +16,7 @@ void check_vk_result(VkResult err);
 
 struct GLFWwindow;
 
-namespace TrayRacer {
+namespace Core {
 
 	struct ApplicationSpecification
 	{

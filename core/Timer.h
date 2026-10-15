@@ -4,7 +4,7 @@
 #include <string>
 #include <chrono>
 
-namespace TrayRacer {
+namespace Core {
 
 	class Timer
 	{

@@ -10,7 +10,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-namespace TrayRacer {
+namespace Core {
 
 	namespace Utils {
 
@@ -37,7 +37,7 @@ namespace TrayRacer {
 			return 0;
 		}
 		
-		static VkFormat TrayRacerFormatToVulkanFormat(ImageFormat format)
+		static VkFormat FormatToVulkanFormat(ImageFormat format)
 		{
 			switch (format)
 			{
@@ -93,7 +93,7 @@ namespace TrayRacer {
 
 		VkResult err;
 		
-		VkFormat vulkanFormat = Utils::TrayRacerFormatToVulkanFormat(m_Format);
+		VkFormat vulkanFormat = Utils::FormatToVulkanFormat(m_Format);
 
 		// Create the Image
 		{

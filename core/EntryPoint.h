@@ -2,7 +2,7 @@
 
 #include "Application.h"
 
-namespace TrayRacer {
+namespace Core {
 
 	int Main(int argc, char** argv)
 	{
@@ -16,5 +16,5 @@ namespace TrayRacer {
 
 int main(int argc, char** argv)
 {
-	return TrayRacer::Main(argc, argv);
+	return Core::Main(argc, argv);
 }

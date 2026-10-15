@@ -6,7 +6,7 @@
 
 #include <glm/glm.hpp>
 
-namespace TrayRacer {
+namespace Core {
 
 	class Random
 	{

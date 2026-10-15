@@ -4,7 +4,7 @@
 
 #include <GLFW/glfw3.h>
 
-namespace TrayRacer {
+namespace Core {
 
 	bool Input::IsKeyDown(KeyCode keycode)
 	{

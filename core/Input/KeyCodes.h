@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <iostream>
 
-namespace TrayRacer {
+namespace Core {
 
 	typedef enum class KeyCode : uint16_t
 	{

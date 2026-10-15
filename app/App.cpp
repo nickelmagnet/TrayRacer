@@ -7,8 +7,9 @@
 #include <memory>
 
 using namespace TrayRacer;
+using namespace Core;
 
-class ExampleLayer : public TrayRacer::Layer
+class FirstLayer : public Core::Layer
 {
 public:
 	virtual void OnUIRender() override
@@ -43,13 +44,13 @@ private:
 	uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 };
 
-TrayRacer::Application* TrayRacer::CreateApplication(int argc, char** argv)
+Core::Application* Core::CreateApplication(int argc, char** argv)
 {
-	TrayRacer::ApplicationSpecification spec;
+	Core::ApplicationSpecification spec;
 	spec.Name = "TrayRacer";
 
-	TrayRacer::Application* app = new TrayRacer::Application(spec);
-	app->PushLayer<ExampleLayer>();
+	Core::Application* app = new Core::Application(spec);
+	app->PushLayer<FirstLayer>();
 	app->SetMenubarCallback([app]()
 	{
 		if (ImGui::BeginMenu("File"))

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace TrayRacer {
+namespace Core {
 
 	class Layer
 	{

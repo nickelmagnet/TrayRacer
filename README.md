@@ -27,8 +27,7 @@ Dependencies in `vendor/` are git submodules, so clone with:
 ```bash
 git clone --recursive https://github.com/nickelmagnet/TrayRacer.git
 cd TrayRacer
-make
-./bin/TrayRacerApp
+make run
 ```
 
 If you already cloned without `--recursive`: `git submodule update --init --recursive`

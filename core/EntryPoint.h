@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Application.h"
+
 namespace TrayRacer {
 
 	int Main(int argc, char** argv)

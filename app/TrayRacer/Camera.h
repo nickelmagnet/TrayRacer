@@ -1,6 +1,8 @@
 #pragma once
 
-#include "glm/vec3.hpp"
+#include <cstdint>
+
+#include "glm/glm.hpp"
 #include "Ray.h"
 
 namespace TrayRacer {

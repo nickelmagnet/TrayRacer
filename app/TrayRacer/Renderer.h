@@ -4,6 +4,8 @@
 #include <vector>
 #include <cstdint>
 
+#include <glm/glm.hpp>
+
 #include "Camera.h"
 #include "Image.h"
 

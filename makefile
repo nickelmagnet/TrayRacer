@@ -5,25 +5,26 @@ AR  := ar
 BIN := bin
 BUILD := build
 
+CONFIG ?= Debug
+
 TARGET := $(BIN)/$(CONFIG)/TrayRacer
 GLFW_LIB := $(BIN)/$(CONFIG)/lib/libglfw.a
 
 CPPFLAGS := \
-	-Isrc/TrayRacer \
-	-Ivendor/imgui \
-	-Ivendor/imgui/backends \
-	-Ivendor/glfw/include \
-	-Ivendor/glm \
-	-Ivendor/stb_image
-
-CONFIG ?= Debug
+	-Icore \
+	-Iapp/TrayRacer \
+	-isystem vendor/imgui \
+	-isystem vendor/imgui/backends \
+	-isystem vendor/glfw/include \
+	-isystem vendor/glm \
+	-isystem vendor/stb_image
 
 ifeq ($(CONFIG),Debug)
-    CXXFLAGS := -std=c++17 -Wall -Wextra -O0 -g 
-    CFLAGS   := -std=c11 -Wall -Wextra -O0 -g -D_GLFW_X11 -D_GNU_SOURCE
+    CXXFLAGS := -std=c++17 -Wall -Wextra -MMD -MP -O0 -g 
+    CFLAGS   := -std=c11 -Wall -Wextra -MMD -MP -O0 -g -D_GLFW_X11 -D_GNU_SOURCE
 else ifeq ($(CONFIG),Release)
-    CXXFLAGS := -std=c++17 -Wall -Wextra -O2
-    CFLAGS   := -std=c11 -Wall -Wextra -O2 -D_GLFW_X11 -D_GNU_SOURCE
+    CXXFLAGS := -std=c++17 -Wall -Wextra -MMD -MP -O2
+    CFLAGS   := -std=c11 -Wall -Wextra -MMD -MP -O2 -D_GLFW_X11 -D_GNU_SOURCE
 endif
 
 LDLIBS := \
@@ -38,9 +39,10 @@ LDLIBS := \
 	-lpthread \
 
 CPP_SRC := $(wildcard \
-	src/TrayRacer/*.cpp \
-	src/TrayRacer/Input/*.cpp \
-	TrayRacerApp/src/*.cpp \
+	core/*.cpp \
+	core/Input/*.cpp \
+	app/*.cpp \
+	app/TrayRacer/*.cpp \
 	vendor/imgui/*.cpp)
 
 CPP_SRC += \
@@ -52,13 +54,13 @@ CPP_OBJ := $(patsubst %.cpp,$(BUILD)/$(CONFIG)/%.o,$(CPP_SRC))
 GLFW_SRC := $(wildcard vendor/glfw/src/*.c)
 GLFW_OBJ := $(patsubst %.c,$(BUILD)/$(CONFIG)/%.o,$(GLFW_SRC))
 
-.PHONY: all clean run glfw debug release
+.PHONY: all clean test run glfw debug release
 
 all: $(TARGET)
 
-$(TARGET): $(CPP_OBJ) $(GLFW_LIB)
-	@mkdir -p $(BIN)
-	$(CXX) $^ $(LDLIBS) -o $@
+$(TARGET): $(CPP_OBJ) | $(GLFW_LIB)
+	@mkdir -p $(dir $@)
+	$(CXX) $(CPP_OBJ) $(GLFW_LIB) $(LDLIBS) -o $@
 
 $(GLFW_LIB): $(GLFW_OBJ)
 	@mkdir -p $(dir $@)
@@ -75,15 +77,24 @@ $(BUILD)/$(CONFIG)/%.o: %.c
 glfw: $(GLFW_LIB)
 
 debug:
-	@$(MAKE) CONFIG=Debug all > build/debug.log 2>&1 || (echo "Debug build failed. See build/debug.log" && exit 1)
+	@$(MAKE) CONFIG=Debug all > debug.log 2>&1 || (echo "Debug build failed" && cat debug.log && rm -f debug.log && exit 1)
+	@rm -f debug.log
 	@echo "Debug build succeeded."
 
 release:
-	@$(MAKE) -j$(nproc) CONFIG=Release all > build/release.log 2>&1 || (echo "Release build failed. See build/release.log" && exit 1)
+	@$(MAKE) -j$(nproc) CONFIG=Release all > release.log 2>&1 || (echo "Release build failed" && cat release.log && rm -f release.log && exit 1)
+	@rm -f release.log
 	@echo "Release build succeeded."
 
-run: $(TARGET)
-	./$(TARGET)
+test:
+	@$(MAKE) debug
+	./$(BIN)/Debug/TrayRacer
+
+run:
+	@$(MAKE) release
+	./$(BIN)/Release/TrayRacer
 
 clean:
 	rm -rf $(BUILD) $(BIN)
+
+-include $(CPP_OBJ:.o=.d) $(GLFW_OBJ:.o=.d)

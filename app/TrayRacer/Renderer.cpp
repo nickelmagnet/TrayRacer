@@ -2,6 +2,8 @@
 #include "Random.h"
 #include "Ray.h"
 
+#include <cmath>
+
 namespace TrayRacer {
 
     void Renderer::OnResize(uint32_t w, uint32_t h) {
@@ -34,16 +36,16 @@ namespace TrayRacer {
         glm::vec3 center{ 0.0f, 0.0f, -1.0f };
         float radius = 0.5f;
         glm::vec3 oc = center - ray.GetOrigin();
-        float a = dot(ray.GetDirection(), ray.GetDirection());
-        float b = -2.0 * dot(ray.GetDirection(), oc);
-        float c = dot(oc, oc) - radius * radius;
+        float a = glm::dot(ray.GetDirection(), ray.GetDirection());
+        float b = -2.0f * glm::dot(ray.GetDirection(), oc);
+        float c = glm::dot(oc, oc) - radius * radius;
         float discriminant = b * b - 4 * a * c;
         if (discriminant >= 0) {
-            float t = (-b - sqrt(discriminant)) / (2.0 * a);
+            float t = (-b - std::sqrt(discriminant)) / (2.0f * a);
 			// its solution is t = (-b ± sqrt(discriminant)) / (2.0 * a); 
 			// ray is origin + t * direction,-b is positive so -b-sqrt(discriminant) is closer to cam
 			glm::vec3 hit_point = ray.At(t);
-			glm::vec3 normal = glm::normalize(hit_point - center);
+            glm::vec3 normal = glm::normalize(hit_point - center);
             clr = static_cast<uint8_t>(glm::clamp(normal.x, 0.0f, 1.0f) * 255.0f);
             clg = static_cast<uint8_t>(glm::clamp(normal.y, 0.0f, 1.0f) * 255.0f);
             clb = static_cast<uint8_t>(glm::clamp(normal.z, 0.0f, 1.0f) * 255.0f);

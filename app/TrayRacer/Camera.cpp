@@ -1,5 +1,7 @@
 #include "Camera.h"
 
+#include <cmath>
+
 namespace TrayRacer {
 
     Camera::Camera(glm::vec3 lookfrom, glm::vec3 lookat, glm::vec3 vup, uint32_t width, uint32_t height)
@@ -12,8 +14,8 @@ namespace TrayRacer {
         float viewport_width = viewport_height * aspect_ratio;
 
         glm::vec3 w = glm::normalize(lookfrom - lookat);
-        glm::vec3 u = glm::normalize(cross(vup, w));
-        glm::vec3 v = cross(w, u);
+        glm::vec3 u = glm::normalize(glm::cross(vup, w));
+        glm::vec3 v = glm::cross(w, u);
 
         glm::vec3 viewport_u = viewport_width * u;
         glm::vec3 viewport_v = -viewport_height * v;
